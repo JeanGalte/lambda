@@ -18,7 +18,7 @@ let nocontext = (1, fun (c : char) -> -1)
 let isbound (cont : context) (c : char) : bool = (snd cont) c <> (-1)
 
 (* Incrementing the number of free variables *)
-let liftfreevar (c : context) : context = (succ (fst c), snd c)
+let liftfreevar (c : context) (v : char) : context = (succ (fst c), fun (k : char) -> if k = v then fst c else (snd c) k)
 
 (* Lifting a context when opening a new scope, when binding with a lambda *)
 let liftcontext (cont : context) (c : char) : context = (succ (fst cont) , fun (k : char) -> if k = c then 1 else (if isbound cont k then (succ ((snd cont) k)) else (-1) ) )
@@ -91,7 +91,7 @@ let lambda_well_written (s : char list) : (char * bool) =
 
 let print_test (s : char list) : unit list = List.map print_char s
 
-let parse_inter (s : string) : lam_not_built = 
+let parse_inter (s : string) (c : context): lam_not_built = 
 	let rec aux (s : char list) (c : context) (acc : lam_not_built) : lam_not_built = 	
 		(
 		match s with
@@ -120,12 +120,12 @@ let parse_inter (s : string) : lam_not_built =
 								) 
 						)		
 			| k when List.mem k (explode "abcdefghijklmnopqrstuvwxyz") -> 
-				let (v, b) = (applycontext c k) in aux xs (if b then c else (liftfreevar c)) (addterm (V (v)) acc)
+				let (v, b) = (applycontext c k) in aux xs (if b then c else (liftfreevar c k)) (addterm (V (v)) acc)
 			| _ ->	raise (Parse_Err ("Unrecognized char : " ^ (Char.escaped x)) )
 			)
 		| [] -> acc
 		)
-	in aux (explode s) nocontext (N [])
+	in aux (explode s) c (N [])
 
 
 (* do not mix up the L from the lambda type, and the L from lambda_not_built type *)
@@ -139,4 +139,4 @@ let rec apply_left_ass (l : lam_not_built) : lambda =
 	| N ( (Lam x) :: xs) -> apply_left_ass (N ( (T (L (apply_left_ass x))) :: xs))
 	| N ( (T x) :: y :: xs) -> apply_left_ass (N ((T (A ( x, apply_left_ass y))) :: xs))
 
-let parse (s : string) : lambda = apply_left_ass (parse_inter s) 
+let parse_nature (s : string) : lambda = apply_left_ass (parse_inter s nocontext) 
