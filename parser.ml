@@ -4,29 +4,12 @@ open List
 exception Process_Err of string
 exception Parse_Err of string
 
-type lambda = 
-	| V of int 
-	| L of lambda 
-	| A of (lambda * lambda)
-
-
 (* 
-Operating on context
+Operating on contexts
 *)
 
 (* The first member describes "the highest free variable named", or just the distance in lambdas with the beginning*)
 type context = int * (char -> int)
-
-(* Incrementing the number of free variables *)
-let liftfreevar (c : context) : context = (succ (fst c), snd c)
-
-(* Lifting a context when opening a new scope, when binding with a lambda *)
-let liftcontext (cont : context) (c : char) : context = (succ (fst cont) , fun (k : char) -> if k = c then 1 else succ ((snd cont) k))
-
-(* Applying the context to chars*)
-let applycontext (cont : context) (c : char) : int * bool = 
-	let r = (snd cont) c in 
-	if r = -1 then (fst cont, false) else (r, true)
 
 (* Empty context *)
 let nocontext = (1, fun (c : char) -> -1)
@@ -34,24 +17,38 @@ let nocontext = (1, fun (c : char) -> -1)
 (* Know if a variable is bound or not in a context  *)
 let isbound (cont : context) (c : char) : bool = (snd cont) c <> (-1)
 
+(* Incrementing the number of free variables *)
+let liftfreevar (c : context) : context = (succ (fst c), snd c)
+
+(* Lifting a context when opening a new scope, when binding with a lambda *)
+let liftcontext (cont : context) (c : char) : context = (succ (fst cont) , fun (k : char) -> if k = c then 1 else (if isbound cont k then (succ ((snd cont) k)) else (-1) ) )
+
+(* Applying the context to chars*)
+let applycontext (cont : context) (c : char) : int * bool = 
+	let r = (snd cont) c in 
+	if r = -1 
+	then 
+		(fst cont, false) 
+	else 
+		(r, true)
 
 (* 
 Operating on the lam_not_built type, which is used to build a kind of nested list in which information is stored, before becoming terms 
 *)
 
-type lam_not_built = T of lambda | N of lam_not_built list | L of lam_not_built
+type lam_not_built = T of lambda | N of lam_not_built list | Lam of lam_not_built
 
 (* Adding a still-not-built term to the structure *)
 let addterm (t : lambda) (l : lam_not_built) : lam_not_built = 
 	match l with
 	| T _ -> raise (Process_Err "Cannot add a term to a term")
-	| L _ -> raise (Process_Err "Cannot add a term to a constructing lambda")
+	| Lam _ -> raise (Process_Err "Cannot add a term to a constructing lambda")
 	| N x -> N (x @ [T t])
 
 (* Adding a still-not-bult abstraction to the structure *)
 let addabs (t : lam_not_built) (l : lam_not_built) : lam_not_built = 
 	match (t, l) with
-	| (N xs, N ys) -> N (ys @ [(L t)] ) 
+	| (N xs, N ys) -> N (ys @ [(Lam t)] ) 
 	| _ -> raise (Process_Err "Left member must be abstractable, or right member must be a list")
 
 (* Adding a still-not-built parenthesis to the structure *)
@@ -104,7 +101,8 @@ let parse_inter (s : string) : lam_not_built =
 			| '(' ->
 				let (inpar, fin) = split_par xs in
 				let left = addpar acc (aux inpar c (N [])) in
-				left 
+				let right = aux fin c (N []) in
+				merge left right
 			| '\\' -> 
 						let (v, w) = lambda_well_written xs in
 						(
@@ -128,3 +126,17 @@ let parse_inter (s : string) : lam_not_built =
 		| [] -> acc
 		)
 	in aux (explode s) nocontext (N [])
+
+
+(* do not mix up the L from the lambda type, and the L from lambda_not_built type *)
+let rec apply_left_ass (l : lam_not_built) : lambda = 
+	match l with
+	| N [] -> raise (Parse_Err "Empty parenthesis detected")
+	| T t -> t
+	| Lam x -> L (apply_left_ass x)
+	| N [x] -> apply_left_ass x
+	| N ( (N x) :: xs ) -> apply_left_ass ( N ( (T (apply_left_ass (N x))) :: xs))
+	| N ( (Lam x) :: xs) -> apply_left_ass (N ( (T (L (apply_left_ass x))) :: xs))
+	| N ( (T x) :: y :: xs) -> apply_left_ass (N ((T (A ( x, apply_left_ass y))) :: xs))
+
+let parse (s : string) : lambda = apply_left_ass (parse_inter s) 

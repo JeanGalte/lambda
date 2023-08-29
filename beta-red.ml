@@ -1,6 +1,6 @@
-open Lambda
+(* open Lambda
 open Substitution
-
+ *)
 (* Evaluates to true if and only if the term is in normal form for the beta-reduction*)
 let is_normal (l : lambda) : bool = 
 	match l with
@@ -26,7 +26,7 @@ let rec beta_red (l : lambda ) : lambda =
 	| L t  when not (is_normal t) ->  L (beta_red t)
 	| _ -> l 
 
-(* Evaluates to the beta-reduct of a term, evaluates to None since a term is stable by beta-reduction *)
+(* Evaluates to the beta-reduct of a term, evaluates to None since a term is stable by beta-reduction*)
 let rec normalize (l : lambda) : lambda option =
 	if is_normal l 
 	then 

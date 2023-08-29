@@ -1,5 +1,7 @@
-open Lambda
 open String
+open List
+
+
 
 (* Explodes a string to a char list *)
 let explode (s : string) : char list =
@@ -8,15 +10,19 @@ let explode (s : string) : char list =
   exp (String.length s - 1) []
 
 
-(* Checks the syntax of a term writen as a string with \ as λ*)
+(*
+Checks the syntax of a term writen as a string with \ as λ
+Won't syntax-check expressions with the shortened syntax (like \xy.x for example)
+Will syntax-check expressions which do not respect Barendregt’s variable convention
+*)
 let checksyntax (s  : string) : bool = 
 	let rec reccheck (s : char list) (p : int) (lamon : int) : bool =
 		begin match s with
 		| [] -> p = 0 && lamon = 0
 		| x :: xs -> begin match x with
-			| '\\' -> if lamon = 3 || lamon = 2 then (let () = print_string "1" in false) else reccheck xs p 3
+			| '\\' -> if lamon = 3 || lamon = 2 then false else reccheck xs p 3
 			| '.'  -> if lamon != 2 then false else reccheck xs p 1
-			| '('  -> if lamon > 1 then  false else reccheck xs (p+1) 0
+			| '('  -> if (lamon > 1 || (p+1) > (List.length xs) ) then  false else (if List.hd xs = ')' then false else reccheck xs (p+1) 0) 
 			| ')'  -> if lamon > 1 then  false else if p = 0 then false else reccheck xs (p-1) 0
 			| _    -> if lamon = 2 then (let () = print_string "5" in false) else reccheck xs p (if lamon = 0 then 0 else pred lamon)	 
 			end 
