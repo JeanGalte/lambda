@@ -141,3 +141,15 @@ let rec apply_left_ass (l : lam_not_built) : lambda =
 	| N ( (T x) :: y :: xs) -> apply_left_ass (N ((T (A ( x, apply_left_ass y))) :: xs))
 
 let parse_nature (s : string) : lambda = apply_left_ass (parse_inter s nocontext) 
+
+
+
+(* 
+A faire : on fait un contexte de string dans lambda pour pouvoir faire des lambdas termes pré-enregistrés
+Par convention, les termes pré-enregistrés seront écrits en majuscule (ceux contenus dans le contexte au début du parsing)
+Écrire une fonction pour, dès qu'on rencontre une majuscule, aller reconnaitre le terme
+
+
+
+
+*)
