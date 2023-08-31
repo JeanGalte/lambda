@@ -16,7 +16,10 @@ let split_par (l : char list) : (char list * char list) option  =
 		| [] -> None 
 	in aux l [] 0
 
-(* Exploding the original string to a char list *)
+(*
+Exploding the original string to a char list 
+Should be used on raw string, will bug meeting \n, \r, \t, \b otherwise.
+*)
 let explode (s : string) : char list =
   let rec exp (i : int) (l : char list)  : char list =
     if i < 0 then l else exp (i - 1) (s.[i] :: l) in
@@ -25,7 +28,7 @@ let explode (s : string) : char list =
 (* When \ is written, we check that it is followed by a var name and a point, and something else which is a letter *)
 let lambda_well_written (s : char list) : char option = 
 	match s with
-	| x :: y :: z :: xs when (List.mem x (explode "abcdefghijklmnopqrstuvwxyz")) && y = '.' && (List.mem z (explode "abcdefghijklmnopqrstuvwxyz(\\ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")) -> Some	x
+	| x :: y :: z :: xs when (List.mem x (explode "abcdefghijklmnopqrstuvwxyz")) && y = '.' && (List.mem z (explode "abcdefghijklmnopqrstuvwxyz(ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890\\")) -> Some	x
 	| _ -> None
 
 (* Joining a char list *)

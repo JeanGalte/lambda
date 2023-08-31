@@ -72,7 +72,6 @@ let parse_inter (s : string) (c : context) (i : identifier) : lam_not_built =
 		(
 		match s with
 		| x :: xs ->
-			print_char x ; 
 			(
 			match x with
 			| '(' ->
@@ -81,7 +80,7 @@ let parse_inter (s : string) (c : context) (i : identifier) : lam_not_built =
 				let right = aux fin c (N []) in
 				merge left right
 			| '\\' -> 
-						let v = (unwrap_ex (lambda_well_written xs) (Parse_Err "The lambda term is not well written, any λ must be followed by a letter, a dot and then by a letter. Here a λ is followed by less than 2 chars")) in
+						let v = (unwrap_ex (lambda_well_written xs) (Parse_Err "The lambda term is not well written, any λ must be followed by a letter, a dot and then by a letter")) in
 						if (isbound c v) 
 						then 
 							raise (Parse_Err ("The " ^ (Char.escaped v) ^ " is already bound")) 
