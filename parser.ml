@@ -7,7 +7,6 @@ open String_m
  *) 
 exception Process_Err of string
 exception Parse_Err of string
-exception Missing_Parenthesis
 
 (* 
 Operating on contexts
@@ -62,22 +61,22 @@ let addpar (t : lam_not_built) (l : lam_not_built) : lam_not_built =
 	| ( N xs , N ys) -> N (xs @ [l]) 
 	| _ -> raise (Process_Err "Cannot add a parenthesis if it does not output as a N ... ")
 
-(* merging *)
+(* mergining to lam_not_built *)
 let merge (left : lam_not_built) (right : lam_not_built) : lam_not_built = 
 	match (left, right) with
 	| (N xs, N ys) -> N (xs @ ys)
 	| _ -> raise (Process_Err "Cannot merge two still-not-build structures if they are not in list form")
 
-
-let parse_inter (s : string) (c : context): lam_not_built = 
+let parse_inter (s : string) (c : context) (i : identifier) : lam_not_built = 
 	let rec aux (s : char list) (c : context) (acc : lam_not_built) : lam_not_built = 	
 		(
 		match s with
 		| x :: xs ->
+			print_char x ; 
 			(
 			match x with
 			| '(' ->
-				let (inpar, fin) = unwrap_ex (split_par xs) Missing_Parenthesis  in
+				let (inpar, fin) = unwrap_ex (split_par xs) (Parse_Err "Missing ) parenthesis")  in
 				let left = addpar acc (aux inpar c (N [])) in
 				let right = aux fin c (N []) in
 				merge left right
@@ -91,6 +90,8 @@ let parse_inter (s : string) (c : context): lam_not_built =
 							addabs (aux inlamb (liftcontext c v) (N [])) acc
 			| k when List.mem k (explode "abcdefghijklmnopqrstuvwxyz") -> 
 				let (v, b) = (applycontext c k) in aux xs (if b then c else (liftfreevar c k)) (addterm (V (v)) acc)
+			| k when List.mem k (explode "ABCDEFGHIJKLMNOPURSTUVWXYZ") -> 
+				let (t, r) = unwrap_ex (lookforterm s i) (Parse_Err ("Unrecognized term since " ^ (join s))) in aux r c (addterm t acc)  
 			| _ ->	raise (Parse_Err ("Unrecognized char : " ^ (Char.escaped x)) )
 			)
 		| [] -> acc
@@ -98,7 +99,7 @@ let parse_inter (s : string) (c : context): lam_not_built =
 	in aux (explode s) c (N [])
 
 
-(* do not mix up the L from the lambda type, and the L from lambda_not_built type *)
+(* Applies recursively left associativity to the lam_not_built type to get the term*)
 let rec apply_left_ass (l : lam_not_built) : lambda = 
 	match l with
 	| N [] -> raise (Parse_Err "Empty parenthesis detected")
@@ -109,7 +110,7 @@ let rec apply_left_ass (l : lam_not_built) : lambda =
 	| N ( (Lam x) :: xs) -> apply_left_ass (N ( (T (L (apply_left_ass x))) :: xs))
 	| N ( (T x) :: y :: xs) -> apply_left_ass (N ((T (A ( x, apply_left_ass y))) :: xs))
 
-let parse (s : string) : lambda = apply_left_ass (parse_inter s nocontext) 
+let parse ?(i = default_identifier) (s : string)  : lambda = apply_left_ass (parse_inter s nocontext i) 
 
 (* 
 A faire : on fait un contexte de string dans lambda pour pouvoir faire des lambdas termes pré-enregistrés

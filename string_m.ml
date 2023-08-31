@@ -1,3 +1,4 @@
+open List
 (* 
 Operating on strings, or char list
 *)
@@ -24,5 +25,8 @@ let explode (s : string) : char list =
 (* When \ is written, we check that it is followed by a var name and a point, and something else which is a letter *)
 let lambda_well_written (s : char list) : char option = 
 	match s with
-	| x :: y :: z :: xs when (List.mem x (explode "abcdefghijklmnopqrstuvwxyz")) && y = '.' && (List.mem z (explode "abcdefghijklmnopqrstuvwxyz(\\")) -> Some	x
+	| x :: y :: z :: xs when (List.mem x (explode "abcdefghijklmnopqrstuvwxyz")) && y = '.' && (List.mem z (explode "abcdefghijklmnopqrstuvwxyz(\\ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")) -> Some	x
 	| _ -> None
+
+(* Joining a char list *)
+let join (s : char list) : string = List.fold_right (^) (List.map Char.escaped s) ""
