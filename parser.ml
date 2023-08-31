@@ -1,8 +1,13 @@
+
 (* open Char
 open List
- *)
+open Identifier
+open Error_g
+open String_m
+ *) 
 exception Process_Err of string
 exception Parse_Err of string
+exception Missing_Parenthesis
 
 (* 
 Operating on contexts
@@ -63,34 +68,6 @@ let merge (left : lam_not_built) (right : lam_not_built) : lam_not_built =
 	| (N xs, N ys) -> N (xs @ ys)
 	| _ -> raise (Process_Err "Cannot merge two still-not-build structures if they are not in list form")
 
-(* 
-Operating on strings, or char list
-*)
-
-(* splits an expression with the corresponding parenthesis ) *)
-let split_par (l : char list) : (char list * char list)  = 
-	let rec aux (l : char list) (acc : char list) (n : int) : (char list * char list) =
-		match l with
-		| x :: xs when x = ')'  -> if n = 0 then (List.rev acc, xs) else aux xs (x :: acc) (pred n)
-		| x :: xs when x = '(' -> aux xs (x :: acc) (succ n)		
-		| x :: xs -> aux xs (x :: acc) n
-		| [] -> raise (Parse_Err "Missing closing parenthesis")
-	in aux l [] 0
-
-(* Exploding the original string to a char list *)
-let explode (s : string) : char list =
-  let rec exp (i : int) (l : char list)  : char list =
-    if i < 0 then l else exp (i - 1) (s.[i] :: l) in
-  exp (String.length s - 1) []
-
-(* When \ is written, we check that it is followed by a var name and a point, and something else which is a letter *)
-let lambda_well_written (s : char list) : (char * bool) = 
-	match s with
-	| x :: y :: z :: xs -> 
-		(x, (List.mem x (explode "abcdefghijklmnopqrstuvwxyz")) && y = '.' && (List.mem z (explode "abcdefghijklmnopqrstuvwxyz(\\")))  
-	| _ -> raise (Parse_Err "The lambda term is not well written, any λ must be followed by a letter, a dot and then by a letter. Here a λ is followed by less than 2 chars.")
-
-let print_test (s : char list) : unit list = List.map print_char s
 
 let parse_inter (s : string) (c : context): lam_not_built = 
 	let rec aux (s : char list) (c : context) (acc : lam_not_built) : lam_not_built = 	
@@ -100,26 +77,18 @@ let parse_inter (s : string) (c : context): lam_not_built =
 			(
 			match x with
 			| '(' ->
-				let (inpar, fin) = split_par xs in
+				let (inpar, fin) = unwrap_ex (split_par xs) Missing_Parenthesis  in
 				let left = addpar acc (aux inpar c (N [])) in
 				let right = aux fin c (N []) in
 				merge left right
 			| '\\' -> 
-						let (v, w) = lambda_well_written xs in
-						(
-							if not w 
-							then 
-								raise (Parse_Err "The lambda term is not well written, any λ must be followed by a letter, a dot and then by a letter. Here the lambda term does not fits this definition.")
-							else 
-								(
-									if (isbound c v)
-									then
-										raise (Parse_Err ("The " ^ (Char.escaped v) ^ " is already bound"))
-									else
-										let inlamb = List.tl (List. tl xs) in 
-										addabs (aux inlamb (liftcontext c v) (N [])) acc
-								) 
-						)		
+						let v = (unwrap_ex (lambda_well_written xs) (Parse_Err "The lambda term is not well written, any λ must be followed by a letter, a dot and then by a letter. Here a λ is followed by less than 2 chars")) in
+						if (isbound c v) 
+						then 
+							raise (Parse_Err ("The " ^ (Char.escaped v) ^ " is already bound")) 
+						else 
+							let inlamb = List.tl (List.tl xs) in
+							addabs (aux inlamb (liftcontext c v) (N [])) acc
 			| k when List.mem k (explode "abcdefghijklmnopqrstuvwxyz") -> 
 				let (v, b) = (applycontext c k) in aux xs (if b then c else (liftfreevar c k)) (addterm (V (v)) acc)
 			| _ ->	raise (Parse_Err ("Unrecognized char : " ^ (Char.escaped x)) )
@@ -140,16 +109,10 @@ let rec apply_left_ass (l : lam_not_built) : lambda =
 	| N ( (Lam x) :: xs) -> apply_left_ass (N ( (T (L (apply_left_ass x))) :: xs))
 	| N ( (T x) :: y :: xs) -> apply_left_ass (N ((T (A ( x, apply_left_ass y))) :: xs))
 
-let parse_nature (s : string) : lambda = apply_left_ass (parse_inter s nocontext) 
-
-
+let parse (s : string) : lambda = apply_left_ass (parse_inter s nocontext) 
 
 (* 
 A faire : on fait un contexte de string dans lambda pour pouvoir faire des lambdas termes pré-enregistrés
 Par convention, les termes pré-enregistrés seront écrits en majuscule (ceux contenus dans le contexte au début du parsing)
 Écrire une fonction pour, dès qu'on rencontre une majuscule, aller reconnaitre le terme
-
-
-
-
 *)
