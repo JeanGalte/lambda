@@ -44,19 +44,19 @@ let add_term (s : string) (t : lambda) (i : identifier) : identifier =
 
 let default_identifier = 
 	[
-	("If_then_else", L (V 1));
-	("Omega",A (L (A (V 1, V 1)), L (A (V 1, V 1))));	
-	("Yc",L (A (L (A (V 2, A (V 1, V 1))), L (A (V 2, A (V 1, V 1))))));
-	("Theta",A (L (L (A (V 1, A (A (V 2, V 2), V 1)))),L (L (A (V 1, A (A (V 2, V 2), V 1))))));
-	("Sc",L (L (L (A (A (V 3, V 1), A (V 2, V 1))))));
-	("False",L (L (V 2)));
+	("If_then_else", L (V 0));
+	("Omega",A (L (A (V 0, V 0)), L (A (V 0, V 0))));	
+	("Yc",L (A (L (A (V 1, A (V 0, V 0))), L (A (V 1, A (V 0, V 0))))));
+	("Theta",A (L (L (A (V 0, A (A (V 1, V 1), V 0)))),L (L (A (V 0, A (A (V 1, V 1), V 0))))));
+	("Sc",L (L (L (A (A (V 2, V 0), A (V 1, V 0))))));
+	("False",L (L (V 0)));
 	("True",L (L (V 1)));
-	("Or",L (L (A (A (V 2, V 2), V 1))));
-	("And", L (L (A (A (V 2, V 1), V 2))));
-	("Not",  L (A (A (V 1, L (L (V 2))), L (L (V 1)))));
-	("Succ", L (L (L (A (V 2, A (A (V 3, V 2), V 1))))));
-	("Add",L (L (L (L (A (V 3, A (A (V 4, V 2), V 1)))))));
-	("Iszero",L (L (L (A (A (V 3, L (V 2)), V 2)))));
-	("Pred", L (L (L (A (A (A (V 3, L (L (A (V 1, A (V 2, V 4))))), L (V 2)), L (V 1))))));
-	("Mult",  L (L (L (A (V 3, A (V 2, V 1))))));
+	("Or",L (L (A (A (V 1, V 0), V 1))));
+	("And", L (L (A (A (V 1, V 0), V 1))));
+	("Not",  L (A (A (V 0, L (L (V 1))), L (L (V 0)))));
+	("Succ", L (L (L (A (V 1, A (A (V 2, V 1), V 0))))));
+	("Add",L (L (L (L (A (V 2, A (A (V 3, V 1), V 0)))))));
+	("Iszero",L (L (L (A (A (V 2, L (V 1)), V 1)))));
+	("Pred", L (L (L (A (A (A (V 2, L (L (A (V 0, A (V 1, V 3))))), L (V 1)), L (V 0))))));
+	("Mult",  L (L (L (A (V 2, A (V 1, V 0))))));
 	] 

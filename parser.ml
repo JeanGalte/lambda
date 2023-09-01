@@ -16,7 +16,7 @@ Operating on contexts
 type context = int * (char -> int)
 
 (* Empty context *)
-let nocontext = (1, fun (c : char) -> -1)
+let nocontext = (0, fun (c : char) -> -1)
 
 (* Know if a variable is bound or not in a context  *)
 let isbound (cont : context) (c : char) : bool = (snd cont) c <> (-1)
@@ -25,7 +25,7 @@ let isbound (cont : context) (c : char) : bool = (snd cont) c <> (-1)
 let liftfreevar (c : context) (v : char) : context = (succ (fst c), fun (k : char) -> if k = v then fst c else (snd c) k)
 
 (* Lifting a context when opening a new scope, when binding with a lambda *)
-let liftcontext (cont : context) (c : char) : context = (succ (fst cont) , fun (k : char) -> if k = c then 1 else (if isbound cont k then (succ ((snd cont) k)) else (-1) ) )
+let liftcontext (cont : context) (c : char) : context = (succ (fst cont) , fun (k : char) -> if k = c then 0 else (if isbound cont k then (succ ((snd cont) k)) else (-1) ) )
 
 (* Applying the context to chars*)
 let applycontext (cont : context) (c : char) : int * bool = 
@@ -61,6 +61,16 @@ let addpar (t : lam_not_built) (l : lam_not_built) : lam_not_built =
 	| ( N xs , N ys) -> N (xs @ [l]) 
 	| _ -> raise (Process_Err "Cannot add a parenthesis if it does not output as a N ... ")
 
+(* 
+Adding an identified term. Necessary because when we write OrTrueFalse we dont mean  
+\x.\y.xyx\a.\b.a\c.\d.d, but (\x.\y.xyx)(\a.\b.a)(\c.\d.d), or more simply (\x.\y.xyx)(\x.\y.x)(\x.\y.y)
+*)
+let addidentified (t : lambda) (l : lam_not_built) : lam_not_built = 
+	match l with
+	| T _ -> raise (Process_Err "Cannot add an identified term to a term") 
+	| Lam _ -> raise (Process_Err "Cannot add an identified term to a lambda")
+	| N x -> N (x @ [N [T t]])
+
 (* mergining to lam_not_built *)
 let merge (left : lam_not_built) (right : lam_not_built) : lam_not_built = 
 	match (left, right) with
@@ -90,7 +100,7 @@ let parse_inter (s : string) (c : context) (i : identifier) : lam_not_built =
 			| k when List.mem k (explode "abcdefghijklmnopqrstuvwxyz") -> 
 				let (v, b) = (applycontext c k) in aux xs (if b then c else (liftfreevar c k)) (addterm (V (v)) acc)
 			| k when List.mem k (explode "ABCDEFGHIJKLMNOPURSTUVWXYZ") -> 
-				let (t, r) = unwrap_ex (lookforterm s i) (Parse_Err ("Unrecognized term since " ^ (join s))) in aux r c (addterm t acc)  
+				let (t, r) = unwrap_ex (lookforterm s i) (Parse_Err ("Unrecognized term since " ^ (join s))) in aux r c (addidentified t acc)  
 			| _ ->	raise (Parse_Err ("Unrecognized char : " ^ (Char.escaped x)) )
 			)
 		| [] -> acc

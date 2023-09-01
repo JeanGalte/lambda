@@ -1,4 +1,4 @@
-open Lambda
+(* #open Lambda *)
 
 (* The mechanism needed for substitution with de Bruijin index notation : when we do a substitution, we juste "lift" the environment *)
 
