@@ -1,4 +1,7 @@
-(* open Lambda *)
+(*
+open Lambda 
+open Identifier
+*)
 
 (* not fully working, adding too much parenthesis *)
 let rec to_string (l : lambda) : string = 
@@ -20,4 +23,4 @@ let rec to_string_identifier (l : lambda) (i : identifier) : string =
 	| (None, L x) ->  "λ" ^ (to_string_identifier x i)
 	| (None, A (l1 ,l2)) -> "(" ^  (to_string_identifier l1 i) ^ ")" ^ "(" ^ (to_string_identifier l2 i) ^ ")"
 
-let print_lamb_identifier (l : lambda) (i : identifier) : unit = print_string (to_string_identifier l i)
+let print_lamb_identifier ?(i = default_identifier) (l : lambda) : unit = print_string (to_string_identifier l i)

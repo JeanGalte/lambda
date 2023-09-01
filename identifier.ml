@@ -9,6 +9,8 @@ To be parsed properly, identified terms must start with an uppercase letter. For
 
 exception Identifier_err of string
 
+exception Nan_church
+
 type identifier = (string * lambda) list
 
 let identify_string (s : string) (i : identifier) : lambda option = List.assoc_opt s i
@@ -55,8 +57,29 @@ let default_identifier =
 	("And", L (L (A (A (V 1, V 0), V 1))));
 	("Not",  L (A (A (V 0, L (L (V 1))), L (L (V 0)))));
 	("Succ", L (L (L (A (V 1, A (A (V 2, V 1), V 0))))));
-	("Add",L (L (L (L (A (V 2, A (A (V 3, V 1), V 0)))))));
+	("Add",L (L (L (A (V 2, A (V 1, V 0))))));
 	("Iszero",L (L (L (A (A (V 2, L (V 1)), V 1)))));
 	("Pred", L (L (L (A (A (A (V 2, L (L (A (V 0, A (V 1, V 3))))), L (V 1)), L (V 0))))));
 	("Mult",  L (L (L (A (V 2, A (V 1, V 0))))));
 	] 
+
+(* This is why we need beta reduction for our identifier *)
+let rec n_church (n : int) : lambda = 
+	if n = 0 
+	then
+		L (L (V 0))
+	else 
+		let p = n_church (n-1) in
+		match p with
+		| L (L x) -> L (L (A ( V 1, x)))
+		| _ -> raise Nan_church
+
+let lookforint (c : char list) : (lambda * char list) option =
+	let rec aux (c : char list) (acc : string) : (lambda * char list) option = 
+		match c with
+		| x :: xs when List.mem x (explode "1234567890") -> aux xs (acc ^ Char.escaped x)
+		| x :: xs when x = ']' -> Some ( n_church (int_of_string acc), xs) 
+		| [] -> None
+		| _ -> None
+	in aux c ""
+

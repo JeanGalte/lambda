@@ -101,7 +101,9 @@ let parse_inter (s : string) (c : context) (i : identifier) : lam_not_built =
 				let (v, b) = (applycontext c k) in aux xs (if b then c else (liftfreevar c k)) (addterm (V (v)) acc)
 			| k when List.mem k (explode "ABCDEFGHIJKLMNOPURSTUVWXYZ") -> 
 				let (t, r) = unwrap_ex (lookforterm s i) (Parse_Err ("Unrecognized term since " ^ (join s))) in aux r c (addidentified t acc)  
+			| '[' -> let t, r = unwrap_ex (lookforint xs) (Parse_Err ("Badly written int : must be written in [int] format")) in aux r c (addterm t acc) 
 			| _ ->	raise (Parse_Err ("Unrecognized char : " ^ (Char.escaped x)) )
+	
 			)
 		| [] -> acc
 		)
