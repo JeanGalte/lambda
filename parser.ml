@@ -1,10 +1,3 @@
-
-(* open Char
-open List
-open Identifier
-open Error_g
-open String_m
- *) 
 exception Process_Err of string
 exception Parse_Err of string
 
@@ -77,8 +70,9 @@ let merge (left : lam_not_built) (right : lam_not_built) : lam_not_built =
 	| (N xs, N ys) -> N (xs @ ys)
 	| _ -> raise (Process_Err "Cannot merge two still-not-build structures if they are not in list form")
 
-let parse_inter (s : string) (c : context) (i : identifier) : lam_not_built = 
-	let rec aux (s : char list) (c : context) (acc : lam_not_built) : lam_not_built = 	
+(*Building our lam_not_built item*)
+let parse_inter (s : string) (c : context) (i : identifier) : (lam_not_built * context) = 
+	let rec aux (s : char list) (c : context) (acc : lam_not_built) : (lam_not_built * context) = 	
 		(
 		match s with
 		| x :: xs ->
@@ -86,9 +80,10 @@ let parse_inter (s : string) (c : context) (i : identifier) : lam_not_built =
 			match x with
 			| '(' ->
 				let (inpar, fin) = unwrap_ex (split_par xs) (Parse_Err "Missing ) parenthesis")  in
-				let left = addpar acc (aux inpar c (N [])) in
-				let right = aux fin c (N []) in
-				merge left right
+				let (left_toadd , ncont) = aux inpar c (N []) in 
+				let left = addpar acc left_toadd in
+				let right, cf = aux fin ncont (N []) in
+				((merge left right), cf)
 			| '\\' -> 
 						let v = (unwrap_ex (lambda_well_written xs) (Parse_Err "The lambda term is not well written, any λ must be followed by a letter, a dot and then by a letter")) in
 						if (isbound c v) 
@@ -96,16 +91,21 @@ let parse_inter (s : string) (c : context) (i : identifier) : lam_not_built =
 							raise (Parse_Err ("The " ^ (Char.escaped v) ^ " is already bound")) 
 						else 
 							let inlamb = List.tl (List.tl xs) in
-							addabs (aux inlamb (liftcontext c v) (N [])) acc
+							let parsl, cf = aux inlamb (liftcontext c v) (N []) in
+							((addabs parsl acc), cf)
 			| k when List.mem k (explode "abcdefghijklmnopqrstuvwxyz") -> 
-				let (v, b) = (applycontext c k) in aux xs (if b then c else (liftfreevar c k)) (addterm (V (v)) acc)
+				let (v, b) = (applycontext c k) in 
+				aux xs (if b then c else (liftfreevar c k)) (addterm (V (v)) acc)
+				
 			| k when List.mem k (explode "ABCDEFGHIJKLMNOPURSTUVWXYZ") -> 
-				let (t, r) = unwrap_ex (lookforterm s i) (Parse_Err ("Unrecognized term since " ^ (join s))) in aux r c (addidentified t acc)  
-			| '[' -> let t, r = unwrap_ex (lookforint xs) (Parse_Err ("Badly written int : must be written in [int] format")) in aux r c (addterm t acc) 
-			| _ ->	raise (Parse_Err ("Unrecognized char : " ^ (Char.escaped x)) )
-	
+				let (t, r) = unwrap_ex (lookforterm s i) (Parse_Err ("Unrecognized term since " ^ (join s))) 
+				in aux r c (addidentified t acc)  
+			| '[' -> 
+					let t, r = unwrap_ex (lookforint xs) (Parse_Err ("Badly written int : must be written in [int] format")) in 
+					aux r c (addterm t acc) 
+			| _ ->	raise (Parse_Err ("Unrecognized char : " ^ (Char.escaped x)) )	
 			)
-		| [] -> acc
+		| [] -> (acc, c)
 		)
 	in aux (explode s) c (N [])
 
@@ -121,10 +121,4 @@ let rec apply_left_ass (l : lam_not_built) : lambda =
 	| N ( (Lam x) :: xs) -> apply_left_ass (N ( (T (L (apply_left_ass x))) :: xs))
 	| N ( (T x) :: y :: xs) -> apply_left_ass (N ((T (A ( x, apply_left_ass y))) :: xs))
 
-let parse ?(i = default_identifier) (s : string)  : lambda = apply_left_ass (parse_inter s nocontext i) 
-
-(* 
-A faire : on fait un contexte de string dans lambda pour pouvoir faire des lambdas termes pré-enregistrés
-Par convention, les termes pré-enregistrés seront écrits en majuscule (ceux contenus dans le contexte au début du parsing)
-Écrire une fonction pour, dès qu'on rencontre une majuscule, aller reconnaitre le terme
-*)
+let parse ?(i = default_identifier) (s : string)  : lambda = apply_left_ass (fst (parse_inter s nocontext i)) 
