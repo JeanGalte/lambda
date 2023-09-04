@@ -93,11 +93,11 @@ let parse_inter (s : string) (c : context) (i : identifier) : (lam_not_built * c
 							let inlamb = List.tl (List.tl xs) in
 							let parsl, cf = aux inlamb (liftcontext c v) (N []) in
 							((addabs parsl acc), cf)
-			| k when List.mem k (explode "abcdefghijklmnopqrstuvwxyz") -> 
-				let (v, b) = (applycontext c k) in 
-				aux xs (if b then c else (liftfreevar c k)) (addterm (V (v)) acc)
+			| 'a'..'z' -> 
+				let (v, b) = (applycontext c x) in 
+				aux xs (if b then c else (liftfreevar c x)) (addterm (V (v)) acc)
 				
-			| k when List.mem k (explode "ABCDEFGHIJKLMNOPURSTUVWXYZ") -> 
+			| 'A'..'Z' -> 
 				let (t, r) = unwrap_ex (lookforterm s i) (Parse_Err ("Unrecognized term since " ^ (join s))) 
 				in aux r c (addidentified t acc)  
 			| '[' -> 
