@@ -8,7 +8,6 @@ Every technical detail is precised in [Selinger's notes](https://ar5iv.labs.arxi
 - [x] α-equivalence checker
 - [x] β-reductor and β-equivalence checker
 - [ ] Proof for the β-reduction strategy 
-- [ ] η-reductor,  η-β implementation
 - [x] Lambda term printer, with identified terms printing
 - [x] Parser
 - [x] Church integers 
