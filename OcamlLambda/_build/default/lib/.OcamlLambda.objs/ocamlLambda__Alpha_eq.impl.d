@@ -1,1 +1,1 @@
-lib/alpha_eq.ml: Parser
+lib/alpha_eq.ml: Identifier Parser

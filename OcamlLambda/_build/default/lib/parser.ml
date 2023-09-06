@@ -127,4 +127,4 @@ let rec apply_left_ass (l : lam_not_built) : lambda =
 	| N ( (Lam x) :: xs) -> apply_left_ass (N ( (T (L (apply_left_ass x))) :: xs))
 	| N ( (T x) :: y :: xs) -> apply_left_ass (N ((T (A ( x, apply_left_ass y))) :: xs))
 
-let parse ?(i = default_identifier) (s : string)  : lambda = apply_left_ass (fst (parse_inter s nocontext i)) 
+let parse (i : identifier) (s : string)  : lambda = apply_left_ass (fst (parse_inter s nocontext i)) 
