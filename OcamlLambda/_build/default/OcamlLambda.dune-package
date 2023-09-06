@@ -1,0 +1,4 @@
+(lang dune 3.7)
+(name OcamlLambda)
+(sections (lib .) (bin ../../bin))
+(files (lib (META dune-package opam)) (bin (OcamlLambda)))

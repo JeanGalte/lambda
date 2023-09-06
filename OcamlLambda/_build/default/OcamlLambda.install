@@ -1,0 +1,8 @@
+lib: [
+  "_build/install/default/lib/OcamlLambda/META"
+  "_build/install/default/lib/OcamlLambda/dune-package"
+  "_build/install/default/lib/OcamlLambda/opam"
+]
+bin: [
+  "_build/install/default/bin/OcamlLambda"
+]

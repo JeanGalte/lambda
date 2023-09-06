@@ -1,0 +1,4 @@
+(executable
+ (public_name OcamlLambda)
+ (name main)
+ (libraries OcamlLambda))
