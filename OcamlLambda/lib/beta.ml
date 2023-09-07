@@ -67,3 +67,4 @@ let beta_eq (l1 : lambda) (l2 : lambda) : bool =
 		(Lamb.inter s1 s2 = Lamb.empty)  
 	| (Some x, Some y) -> (x = y)
 	| _ -> false  (* By a corollary of Church-Rosser theorem, if M =β N, then neither or both have a β-normal form*)
+

@@ -1,4 +1,4 @@
 (executable
  (public_name lambda_top)
  (name main)
- (libraries lambda_top))
+ (libraries OcamlLambda))
