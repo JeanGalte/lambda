@@ -36,19 +36,22 @@ let handle_let (i: identifier) (s : string) : identifier =
 
 let handle_exit (_ : identifier) (s : string) : unit = if String.equal s "exit" then exit 0 else ()
 
-let handle_print_identifier (s : string) (i : identifier) : unit =
+let handle_print_identifier (i : identifier) (s : string) : unit =
 	if String.starts_with ~prefix:"identifier" s
 	then 
 		print_identifier i
 	else 
 		()
 
+let handle_beta (i : identifier) (s : string) : unit = ()
+
 let parse_command (i : identifier) (s : string) : identifier =
 	let ts = trimspaces s in 
 	let () = handle_exit i ts in
-	let () = handle_print_identifier ts i in
+	let () = handle_print_identifier i ts in
+	let () = handle_beta i ts in
 	let ni = handle_let i ts in
-	ni		 
+	ni
 
 let rec main (i : identifier) : unit = 
 	print_string " λT >" ; 

@@ -1,6 +1,8 @@
 open Lambda
 open Substitution
 
+exception Max_Beta_evaluating of string 
+
 (* Evaluates to true if and only if the term is in normal form for the beta-reduction*)
 let rec is_beta_normal (l : lambda) : bool = 
 	match l with
@@ -28,8 +30,9 @@ let rec beta_red (l : lambda ) : lambda =
 	| _ -> l 
 
 (* Get the beta-reduction "chain" for a certain length*)
-let get_beta_red_chain ?(lim = 100) (l : lambda) : lambda list = 
-	let rec aux (l : lambda) (acc : lambda list) (lim  :int) : lambda list = 
+let get_beta_red_chain ?(lim = 1000000000) (l : lambda) : lambda list = 
+	let rec aux (l : lambda) (acc : lambda list) (lim  :int) : lambda list =
+		if lim = 0 then raise (Max_Beta_evaluating "Not reaching a normal form") else
 		match l with
 		| A (L t,l2) -> aux (subs t (upenv ind l2)) (acc @ [l]) (pred lim)
 		| A (t, v) when is_beta_normal t -> aux (A (t, beta_red v)) (acc @ [l]) (pred lim)
@@ -42,7 +45,8 @@ Evaluates to the beta-reduct of a term, evaluates to None since a term is stable
 Does not terminate always ! Evaluating in None guarantees that your term has no normal form, but the opposite is not true : your term can have no normal form and not evaluate to None with this algorithm. 
 For example, a n-cylce is not evaluating to None if n >2.  
 *)
-let rec normalize (l : lambda) : lambda option =
+let rec normalize ?(lim = 1000000000) (l : lambda) : lambda option =
+	if lim = 0 then raise (Max_Beta_evaluating "Not reaching a notmal form") else 
 	if is_beta_normal l 
 	then 
 		Some l 
@@ -52,11 +56,11 @@ let rec normalize (l : lambda) : lambda option =
 			then
 				None
 			else 
-				normalize red
+				normalize ~lim:(lim-1) red
 
 (* 
 Again, is not guaranteed to terminate.
-For termes with no normal form, it does not give beta equivalence : it only looks for a term that they can both reach with 100 beta reductions (it is a default parameter) 
+For terms with no normal form, it does not give beta equivalence : it only looks for a term that they can both reach with 1000000000 beta reductions (it is a default parameter) 
 *)
 let beta_eq (l1 : lambda) (l2 : lambda) : bool = 
 	match (normalize l1, normalize l2) with
