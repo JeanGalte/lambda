@@ -4,5 +4,5 @@ lib: [
   "_build/install/default/lib/OcamlLambda/opam"
 ]
 bin: [
-  "_build/install/default/bin/OcamlLambda"
+  "_build/install/default/bin/LambdaTop"
 ]

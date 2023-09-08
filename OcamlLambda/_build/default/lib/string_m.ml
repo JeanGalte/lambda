@@ -2,10 +2,24 @@
 Operating on strings, or char list
 *)
 
+let reserved_word = ["load";"let";"identifer"]
+
+let word_valid (s : string) : bool = List.mem s reserved_word
+
 (*
 splits an expression with the corresponding parenthesis ) 
 the None case corresponds to a missing parenthesis
 *)
+
+(* Thanks chatgpt. I have no clue why there is no such function in stdlib tbh *)
+let trimspaces (s : string) : string =
+  let rec aux acc = function
+    | [] -> String.concat "" (List.rev acc)
+    | ' ' :: rest -> aux acc rest
+    | c :: rest -> aux (String.make 1 c :: acc) rest
+  in
+  aux [] (String.to_seq s |> List.of_seq)
+
 let split_par (l : char list) : (char list * char list) option  = 
 	let rec aux (l : char list) (acc : char list) (n : int) : (char list * char list) option =
 		match l with

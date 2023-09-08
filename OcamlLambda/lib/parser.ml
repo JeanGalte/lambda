@@ -4,7 +4,7 @@ open Error_g
 open Identifier
 
 exception Process_Err of string
-exception Parse_Err of string
+exception Term_Parse_Err of string
 
 (* 
 Operating on contexts
@@ -85,16 +85,16 @@ let parse_inter (s : string) (c : context) (i : identifier) : (lam_not_built * c
 			(
 			match x with
 			| '(' ->
-				let (inpar, fin) = unwrap_ex (split_par xs) (Parse_Err "Missing ) parenthesis")  in
+				let (inpar, fin) = unwrap_ex (split_par xs) (Term_Parse_Err "Missing ) parenthesis")  in
 				let (left_toadd , ncont) = aux inpar c (N []) in 
 				let left = addpar acc left_toadd in
 				let right, cf = aux fin ncont (N []) in
 				((merge left right), cf)
 			| '\\' -> 
-						let v = (unwrap_ex (lambda_well_written xs) (Parse_Err "The lambda term is not well written, any λ must be followed by a letter, a dot and then by a letter")) in
+						let v = (unwrap_ex (lambda_well_written xs) (Term_Parse_Err "The lambda term is not well written, any λ must be followed by a letter, a dot and then by a letter")) in
 						if (isbound c v) 
 						then 
-							raise (Parse_Err ("The " ^ (Char.escaped v) ^ " is already bound")) 
+							raise (Term_Parse_Err ("The " ^ (Char.escaped v) ^ " is already bound")) 
 						else 
 							let inlamb = List.tl (List.tl xs) in
 							let parsl, cf = aux inlamb (liftcontext c v) (N []) in
@@ -104,12 +104,12 @@ let parse_inter (s : string) (c : context) (i : identifier) : (lam_not_built * c
 				aux xs (if b then c else (liftfreevar c x)) (addterm (V (v)) acc)
 				
 			| 'A'..'Z' -> 
-				let (t, r) = unwrap_ex (lookforterm s i) (Parse_Err ("Unrecognized term since " ^ (join s))) 
+				let (t, r) = unwrap_ex (lookforterm s i) (Term_Parse_Err ("Unrecognized term since " ^ (join s))) 
 				in aux r c (addidentified t acc)  
 			| '[' -> 
-					let t, r = unwrap_ex (lookforint xs) (Parse_Err ("Badly written int : must be written in [int] format")) in 
+					let t, r = unwrap_ex (lookforint xs) (Term_Parse_Err ("Badly written int : must be written in [int] format")) in 
 					aux r c (addterm t acc) 
-			| _ ->	raise (Parse_Err ("Unrecognized char : " ^ (Char.escaped x)) )	
+			| _ ->	raise (Term_Parse_Err ("Unrecognized char : " ^ (Char.escaped x)) )	
 			)
 		| [] -> (acc, c)
 		)
@@ -119,7 +119,7 @@ let parse_inter (s : string) (c : context) (i : identifier) : (lam_not_built * c
 (* Applies recursively left associativity to the lam_not_built type to get the term*)
 let rec apply_left_ass (l : lam_not_built) : lambda = 
 	match l with
-	| N [] -> raise (Parse_Err "Empty parenthesis detected")
+	| N [] -> raise (Term_Parse_Err "Empty parenthesis detected")
 	| T t -> t
 	| Lam x -> L (apply_left_ass x)
 	| N [x] -> apply_left_ass x

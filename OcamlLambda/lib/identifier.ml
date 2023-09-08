@@ -4,7 +4,6 @@ open String_m
 (* 
 To be parsed properly, identified terms must start with an uppercase letter. For example, Omega = (\x.xx)(\x.xx)
 *)
-
 exception Identifier_err of string
 
 exception Nan_church
@@ -41,6 +40,14 @@ let add_term (s : string) (t : lambda) (i : identifier) : identifier =
 	else
 		((s,t) :: i)
 
+let remove_term (s : string) (i : identifier) : identifier = 
+	let s_i = (List.map fst i) in
+	let elem = List.find_opt (String.equal s) s_i in
+	if elem = None 
+	then
+		raise (Identifier_err ("Cannot remove " ^s^ " from the identifier : no such term is contained"))
+	else 
+		List.filter (fun (a,_) -> a <> s) i
 
 let default_identifier = 
 	[
@@ -61,7 +68,6 @@ let default_identifier =
 	("Mult",  L (L (L (A (V 2, A (V 1, V 0))))));
 	] 
 
-(* This is why we need beta reduction for our identifier *)
 let rec n_church (n : int) : lambda = 
 	if n = 0 
 	then
