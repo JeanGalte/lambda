@@ -1,6 +1,5 @@
 open Lambda
 open Identifier
-open Format
 
 (* Directly taken and modified from https://ocaml.org/docs/formatting-text *)
 let rec print_exp0 (l : lambda) (i : identifier) : unit = 
@@ -9,7 +8,7 @@ let rec print_exp0 (l : lambda) (i : identifier) : unit =
 	then 
 		(match l with
 		| V i -> print_int i
-		| t -> open_hovbox 1; print_string "(" ; print_lambda t i; print_string ")" ;  close_box ()
+		| t -> Format.open_hovbox 1; print_string "(" ; print_lambda t i; print_string ")" ;  Format.close_box ()
 		)
 	else 
 		print_string (Option.get r)
@@ -22,7 +21,7 @@ and print_app (l : lambda) (i : identifier) : unit =
 	if r = None 
 	then 
 		(match l with
-		| a -> open_hovbox 2; print_other_applications a i; close_box ()
+		| a -> Format.open_hovbox 2; print_other_applications a i; Format.close_box ()
 		)
 	else 
 		print_string (Option.get r)
@@ -31,8 +30,20 @@ and print_lambda (l : lambda) (i : identifier) : unit =
 	if r = None 
 	then 
 		(match l with
-		| L t -> open_hovbox 1; print_string "λ"; print_lambda t i
+		| L t -> Format.open_hovbox 1; print_string "λ"; print_lambda t i
 		| a -> print_app a i
 		)
 	else 
-		print_string (Option.get r)
+		print_string (Option.get r) 
+
+let rec print_id (i : identifier) : unit = 
+	match i with
+	| [] -> ()
+	| (s, t) :: xs -> 
+		let () = print_string s in
+		let () = print_string " = " in
+		let () = print_lambda t [] in
+		let () = print_newline () in
+		print_id xs
+
+let print_identifier (i : identifier) : unit = print_string "________________________________________\n" ; print_id i; print_string "________________________________________\n"

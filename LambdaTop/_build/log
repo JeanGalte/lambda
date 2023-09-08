@@ -3,7 +3,7 @@
 # Shared cache: disabled
 # Workspace root: /home/nash/info/ocaml/lambda/LambdaTop
 # Auto-detected concurrency: 4
-$ /home/nash/.opam/5.0.0/bin/ocamlc.opt -config > /tmp/dune_50bb8d_output
+$ /home/nash/.opam/5.0.0/bin/ocamlc.opt -config > /tmp/dune_57a1de_output
 # Dune context:
 #  { name = "default"
 #  ; kind = "default"

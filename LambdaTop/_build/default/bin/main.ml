@@ -20,7 +20,9 @@ let parselet (i : identifier) (s : string) : identifier =
 	let spl = String.split_on_char '=' s in
 	if List.length spl = 2 
 	then
-		let w, t = (List.nth spl 1), (List.nth spl 2) in
+		let w, t = (List.nth spl 0), (List.nth spl 1) in
+		let p = (parse i t) in 
+		print_string (w ^ " : ") ; print_lambda p [] ; print_endline "";
 		add_term (String.capitalize_ascii w) (parse i t) i
 	else 
 		raise (Parse_Err "Two = char seen in let expression")
@@ -28,16 +30,11 @@ let parselet (i : identifier) (s : string) : identifier =
 let handle_let (i: identifier) (s : string) : identifier =
 	if String.starts_with ~prefix:"let" s
 	then 
-		parselet i s
+		parselet i (takeoff_n s 3)
 	else 
 		i
 
 let handle_exit (_ : identifier) (s : string) : unit = if String.equal s "exit" then exit 0 else ()
-
-let rec print_identifier (i : identifier) : unit = 
-	match i with
-	| [] -> ()
-	| (s, t) :: xs -> print_string s ; print_string " = " ; print_lambda t [] ; (print_endline "") ; print_identifier xs
 
 let handle_print_identifier (s : string) (i : identifier) : unit =
 	if String.starts_with ~prefix:"identifier" s
@@ -56,7 +53,6 @@ let parse_command (i : identifier) (s : string) : identifier =
 let rec main (i : identifier) : unit = 
 	print_string " λT >" ; 
 	let ni = parse_command i (read_line ()) in
-	print_endline ""; 
 	main ni
 
-let () = main [] ;;
+let () = print_endline "" ; main [] ;;

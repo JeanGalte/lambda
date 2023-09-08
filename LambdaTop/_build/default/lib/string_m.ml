@@ -20,6 +20,14 @@ let trimspaces (s : string) : string =
   in
   aux [] (String.to_seq s |> List.of_seq)
 
+let takeoff_n (s : string) (n : int) : string =
+  let l = String.length s in
+  if n >= l then
+    ""
+  else
+    String.sub s n (l - n)
+
+
 let split_par (l : char list) : (char list * char list) option  = 
 	let rec aux (l : char list) (acc : char list) (n : int) : (char list * char list) option =
 		match l with

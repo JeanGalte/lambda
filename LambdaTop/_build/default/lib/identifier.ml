@@ -1,9 +1,7 @@
 open Lambda
 open String_m
 
-(* 
-To be parsed properly, identified terms must start with an uppercase letter. For example, Omega = (\x.xx)(\x.xx)
-*)
+(*To be parsed properly, identified terms must start with an uppercase letter. For example, Omega = (\x.xx)(\x.xx)*)
 exception Identifier_err of string
 
 exception Nan_church
