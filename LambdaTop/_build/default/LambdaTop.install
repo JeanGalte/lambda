@@ -1,0 +1,8 @@
+lib: [
+  "_build/install/default/lib/LambdaTop/META"
+  "_build/install/default/lib/LambdaTop/dune-package"
+  "_build/install/default/lib/LambdaTop/opam"
+]
+bin: [
+  "_build/install/default/bin/LambdaTop"
+]
