@@ -1,9 +1,9 @@
-# dune build
+# dune exec LambdaTop
 # OCAMLPARAM: unset
 # Shared cache: disabled
 # Workspace root: /home/nash/info/ocaml/lambda/LambdaTop
 # Auto-detected concurrency: 4
-$ /home/nash/.opam/5.0.0/bin/ocamlc.opt -config > /tmp/dune_70b218_output
+$ /home/nash/.opam/5.0.0/bin/ocamlc.opt -config > /tmp/dune_4c23ea_output
 # Dune context:
 #  { name = "default"
 #  ; kind = "default"
@@ -115,20 +115,3 @@ $ /home/nash/.opam/5.0.0/bin/ocamlc.opt -config > /tmp/dune_70b218_output
 #      ; windows_unicode = false
 #      }
 #  }
-$ (cd _build/default && /home/nash/.opam/5.0.0/bin/ocamldep.opt -modules -impl lib/beta.ml) > _build/default/lib/.LambdaTop.objs/lambdaTop__Beta.impl.d
-$ (cd _build/default && /home/nash/.opam/5.0.0/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I lib/.LambdaTop.objs/byte -no-alias-deps -opaque -open LambdaTop -o lib/.LambdaTop.objs/byte/lambdaTop__Beta.cmo -c -impl lib/beta.ml)
-$ (cd _build/default && /home/nash/.opam/5.0.0/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I bin/.main.eobjs/byte -I lib/.LambdaTop.objs/byte -no-alias-deps -opaque -o bin/.main.eobjs/byte/dune__exe__Main.cmi -c -intf bin/main.mli)
-$ (cd _build/default && /home/nash/.opam/5.0.0/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -a -o lib/LambdaTop.cma lib/.LambdaTop.objs/byte/lambdaTop.cmo lib/.LambdaTop.objs/byte/lambdaTop__Lambda.cmo lib/.LambdaTop.objs/byte/lambdaTop__Substitution.cmo lib/.LambdaTop.objs/byte/lambdaTop__String_m.cmo lib/.LambdaTop.objs/byte/lambdaTop__Error_g.cmo lib/.LambdaTop.objs/byte/lambdaTop__Identifier.cmo lib/.LambdaTop.objs/byte/lambdaTop__Parser.cmo lib/.LambdaTop.objs/byte/lambdaTop__External.cmo lib/.LambdaTop.objs/byte/lambdaTop__Beta.cmo lib/.LambdaTop.objs/byte/lambdaTop__Alpha_eq.cmo)
-$ (cd _build/default && /home/nash/.opam/5.0.0/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I lib/.LambdaTop.objs/byte -I lib/.LambdaTop.objs/native -intf-suffix .ml -no-alias-deps -opaque -open LambdaTop -o lib/.LambdaTop.objs/native/lambdaTop__Beta.cmx -c -impl lib/beta.ml)
-$ (cd _build/default && /home/nash/.opam/5.0.0/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I bin/.main.eobjs/byte -I bin/.main.eobjs/native -I lib/.LambdaTop.objs/byte -I lib/.LambdaTop.objs/native -intf-suffix .ml -no-alias-deps -opaque -o bin/.main.eobjs/native/dune__exe__Main.cmx -c -impl bin/main.ml)
-> File "bin/main.ml", line 46, characters 17-18:
-> 46 | let handle_beta (i : identifier) (s : string) : unit = ()
->                       ^
-> Error (warning 27 [unused-var-strict]): unused variable i.
-> File "bin/main.ml", line 46, characters 34-35:
-> 46 | let handle_beta (i : identifier) (s : string) : unit = ()
->                                        ^
-> Error (warning 27 [unused-var-strict]): unused variable s.
-[2]
-$ (cd _build/default && /home/nash/.opam/5.0.0/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -a -o lib/LambdaTop.cmxa lib/.LambdaTop.objs/native/lambdaTop.cmx lib/.LambdaTop.objs/native/lambdaTop__Lambda.cmx lib/.LambdaTop.objs/native/lambdaTop__Substitution.cmx lib/.LambdaTop.objs/native/lambdaTop__String_m.cmx lib/.LambdaTop.objs/native/lambdaTop__Error_g.cmx lib/.LambdaTop.objs/native/lambdaTop__Identifier.cmx lib/.LambdaTop.objs/native/lambdaTop__Parser.cmx lib/.LambdaTop.objs/native/lambdaTop__External.cmx lib/.LambdaTop.objs/native/lambdaTop__Beta.cmx lib/.LambdaTop.objs/native/lambdaTop__Alpha_eq.cmx)
-$ (cd _build/default && /home/nash/.opam/5.0.0/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -shared -linkall -I lib -o lib/LambdaTop.cmxs lib/LambdaTop.cmxa)

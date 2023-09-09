@@ -21,7 +21,7 @@ Looks for rules in this order :
 
 It is important to note that this is not strictly a beta-reduction function, because a term in normal-form does not beta-reduce to itself while for example, bet_red (V 1) evaluates to V 1.
 *)
-let rec beta_red (l : lambda ) : lambda = 
+let rec beta_red (l : lambda) : lambda = 
 	match l with
 	| A (L t,l2) -> subs t (upenv ind l2)
 	| A (t, v) when is_beta_normal t -> A (t, beta_red v)

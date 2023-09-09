@@ -36,7 +36,11 @@ let add_term (s : string) (t : lambda) (i : identifier) : identifier =
 	then 
 		raise (Identifier_err ("Cannot add " ^ s ^" to the identifier. Another registered term starts with " ^ s ^ " or " ^ s ^ " starts with another term from the identifier, which might cause bugs."))
 	else
-		((s,t) :: i)
+	let anc = List.find_opt (fun (_, ti) -> ti = t) i in
+	(match anc with
+	| None -> ((s,t) :: i)
+	| Some (si, _) -> raise (Identifier_err ("Same term is registered under '" ^ si ^ "' name. Remove it to change the name" ))
+	)
 
 let remove_term (s : string) (i : identifier) : identifier = 
 	let s_i = (List.map fst i) in

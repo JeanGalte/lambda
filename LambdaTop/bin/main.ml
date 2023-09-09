@@ -1,9 +1,10 @@
 open LambdaTop
 open Identifier
 open Parser
-(* open Lambda *)
+open Lambda
 open External
 open String_m
+open Beta
 
 exception Parse_Err of string
 
@@ -16,14 +17,21 @@ A command can be :
 -A let command 
 *)
 
+let rec parse_term (i : identifier) (s : string) : lambda = 
+	if String.starts_with ~prefix:"beta" s
+	then 
+		beta_red (parse_term i (takeoff_n s 4))	
+	else 
+		parse i s
+
 let parselet (i : identifier) (s : string) : identifier =
 	let spl = String.split_on_char '=' s in
 	if List.length spl = 2 
 	then
 		let w, t = (List.nth spl 0), (List.nth spl 1) in
-		let p = (parse i t) in 
+		let p = (parse_term i t) in 
 		print_string (w ^ " : ") ; print_lambda p [] ; print_endline "";
-		add_term (String.capitalize_ascii w) (parse i t) i
+		try (add_term (String.capitalize_ascii w) (parse_term i t) i) with Identifier_err s -> (print_string s ; print_endline ""; i)
 	else 
 		raise (Parse_Err "Two = char seen in let expression")
 
@@ -43,7 +51,7 @@ let handle_print_identifier (i : identifier) (s : string) : unit =
 	else 
 		()
 
-let handle_beta (i : identifier) (s : string) : unit = ()
+let handle_beta (_ : identifier) (_ : string) : unit = ()
 
 let parse_command (i : identifier) (s : string) : identifier =
 	let ts = trimspaces s in 

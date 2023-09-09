@@ -1,6 +1,6 @@
 open Lambda
 
-(* The mechanism needed for substitution with de Bruijin index notation : when we do a substitution, we juste "lift" the environment *)
+(* The mechanism needed for substitution with de Bruijin index notation : when we do a substitution, we just "lift" the environment *)
 
 let ind = (fun i -> V i) 
 
