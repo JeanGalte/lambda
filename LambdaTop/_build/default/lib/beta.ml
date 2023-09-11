@@ -23,21 +23,22 @@ It is important to note that this is not strictly a beta-reduction function, bec
 *)
 let rec beta_red (l : lambda) : lambda = 
 	match l with
-	| A (L t,l2) -> subs t (upenv ind l2)
+	| A (L t,l2) -> subs (ind l2) t 
 	| A (t, v) when is_beta_normal t -> A (t, beta_red v)
 	| A (t, v) -> A (beta_red t, v)
 	| L t  when not (is_beta_normal t) -> L (beta_red t)
 	| _ -> l 
+
 
 (* Get the beta-reduction "chain" for a certain length*)
 let get_beta_red_chain ?(lim = 1000000000) (l : lambda) : lambda list = 
 	let rec aux (l : lambda) (acc : lambda list) (lim  :int) : lambda list =
 		if lim = 0 then raise (Max_Beta_evaluating "Not reaching a normal form") else
 		match l with
-		| A (L t,l2) -> aux (subs t (upenv ind l2)) (acc @ [l]) (pred lim)
-		| A (t, v) when is_beta_normal t -> aux (A (t, beta_red v)) (acc @ [l]) (pred lim)
-		| A (t, v) -> aux (A (beta_red t, v)) (acc @ [l]) (pred lim)
-		| L t  when not (is_beta_normal t) -> aux (L (beta_red t)) (acc @ [l]) (pred lim)
+		| A (L t,l2) -> aux (subs (ind l2) t) (acc @ [l]) (lim -1)
+		| A (t, v) when is_beta_normal t -> aux (A (t, beta_red v)) (acc @ [l]) (lim -1)
+		| A (t, v) -> aux (A (beta_red t, v)) (acc @ [l]) (lim -1)
+		| L t  when not (is_beta_normal t) -> aux (L (beta_red t)) (acc @ [l]) (lim -1)
 		| _ -> acc
 	in aux l [] lim 
 (* 

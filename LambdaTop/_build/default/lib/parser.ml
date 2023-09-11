@@ -86,9 +86,9 @@ let parse_inter (s : string) (c : context) (i : identifier) : (lam_not_built * c
 			match x with
 			| '(' ->
 				let (inpar, fin) = unwrap_ex (split_par xs) (Term_Parse_Err "Missing ) parenthesis")  in
-				let (left_toadd , ncont) = aux inpar c (N []) in 
+				let (left_toadd , _) = aux inpar c (N []) in 
 				let left = addpar acc left_toadd in
-				let right, cf = aux fin ncont (N []) in
+				let right, cf = aux fin c (N []) in
 				((merge left right), cf)
 			| '\\' -> 
 						let v = (unwrap_ex (lambda_well_written xs) (Term_Parse_Err "The lambda term is not well written, any λ must be followed by a letter, a dot and then by a letter")) in
@@ -104,7 +104,7 @@ let parse_inter (s : string) (c : context) (i : identifier) : (lam_not_built * c
 				aux xs (if b then c else (liftfreevar c x)) (addterm (V (v)) acc)
 				
 			| 'A'..'Z' -> 
-				let (t, r) = unwrap_ex (lookforterm s i) (Term_Parse_Err ("Unrecognized term since " ^ (join s))) 
+				let (t, r) = unwrap_ex (lookforterm s i) (Term_Parse_Err ("Unrecognized term " ^ (join s))) 
 				in aux r c (addidentified t acc)  
 			| '[' -> 
 					let t, r = unwrap_ex (lookforint xs) (Term_Parse_Err ("Badly written int : must be written in [int] format")) in 

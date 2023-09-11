@@ -1,4 +1,5 @@
 open Lambda
+open Beta
 open Identifier
 
 (* Directly taken and modified from https://ocaml.org/docs/formatting-text *)
@@ -47,3 +48,11 @@ let rec print_id (i : identifier) : unit =
 		print_id xs
 
 let print_identifier (i : identifier) : unit = print_string "________________________________________\n" ; print_id i; print_string "________________________________________\n"
+
+let print_beta_chain (i : identifier) (l : lambda) : unit = 
+	let bl = get_beta_red_chain l in
+	let rec aux (bl : lambda list) : unit = 
+		match bl with
+		| [] -> print_string "\n";
+		| x :: xs -> print_lambda x i ; aux xs
+	in aux bl 	

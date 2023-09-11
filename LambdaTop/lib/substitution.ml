@@ -1,18 +1,19 @@
 open Lambda
 
-(* The mechanism needed for substitution with de Bruijin index notation : when we do a substitution, we just "lift" the environment *)
+let ind (l : lambda) : int -> lambda =  (fun v -> if v = 0 then l else V (pred v))
 
-let ind = (fun i -> V i) 
-
-(* Lifting up the environment *)
-let upenv (env : int -> lambda) (t : lambda) (i : int) : lambda =  
-	match i with
-	| 0 -> t
-	| _ -> env (i-1)
-
-(* Usual subsitution, described in Selinger *)
-let rec subs (l : lambda) (env : int -> lambda) : lambda = 
+let rec lift_i (i : int) (n : int) (l : lambda) : lambda = 
 	match l with
-	| V i -> env i
-	| L t -> L (subs t (fun (i : int) -> if i = 0 then (V 0) else subs (env (i-1)) (fun (j : int) -> V (succ j)))) 
-	| A (l1, l2) -> A ((subs l1 env), (subs l2 env))
+	| V k -> if k < i then l else V (k + n)
+	| L t -> L (lift_i (succ i) n t)
+	| A (l1, l2) -> A ( lift_i i n l1, lift_i i n l2) 
+
+let lift (n : int) (l : lambda) = lift_i 0 n l
+
+let rec subst_i (i : int) (env : int -> lambda) (l : lambda) : lambda = 
+	match l with
+	| V k -> if k < i then l else lift i (env (k-i))
+	| L t -> L (subst_i (succ i) env t)
+	| A (l1, l2) -> A (subst_i i env l1, subst_i i env l2)
+
+let subs  (env : int -> lambda) (l : lambda) : lambda = subst_i 0 env l
