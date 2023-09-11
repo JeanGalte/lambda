@@ -10,7 +10,9 @@ exception Parse_Err of string
 
 (*
 A command can be :
+-An exit command
 -A print_identifier command
+-A load_identifier
 -A print_beta_chain command
 -A let command of a var name and a term
 -A remove command
@@ -18,7 +20,7 @@ A command can be :
 
 *)
 
-type command = E | I | P of lambda | R of string | L of (string * lambda) | T of lambda
+type command = E | I | D | P of lambda | R of string | L of (string * lambda) | T of lambda
 
 let rec parse_term (i : identifier) (s : string) : lambda = 
 	if String.starts_with ~prefix:"beta" s
@@ -49,8 +51,9 @@ let parse_command (i : identifier) (s : string) : command option =
 	| _ when String.starts_with ~prefix:"identifier" ts -> Some I
 	| _ when String.starts_with ~prefix:"print_beta_chain" ts -> Some (parse_beta_chain i ts)
 	| _ when String.starts_with ~prefix:"rm" ts -> Some (parse_rm ts)
-	| _ when String.starts_with ~prefix:"let" ts -> (try Some (parse_let i ts) with Parse_Err err -> (print_string err ; None))
-	| _ -> (try Some (T (parse_term i ts)) with Parse_Err err -> (print_string err ; None))
+	| _ when String.starts_with ~prefix:"let" ts -> Some (parse_let i ts) 
+	| _ when String.starts_with ~prefix:"load_default_id" ts -> Some D
+	| _ -> (try Some (T (parse_term i ts)) with Parse_Err err | Term_Parse_Err err-> (print_string err ; print_newline (); None))
 
 let rec main (i : identifier) : unit = 
 	print_string "λT>" ; 
@@ -61,9 +64,10 @@ let rec main (i : identifier) : unit =
 		match c with
 		| E -> print_string "λT exited" ; exit 0
 		| I -> print_identifier i ; main i
+		| D -> print_identifier default_identifier; main default_identifier
 		| P l -> print_beta_chain i l; main i
 		| R s -> main (remove_term s i)
-		| L (s, l) -> print_lambda l [] ; print_newline () ; main (add_term s l i) 
+		| L (s, l) -> print_lambda l [] ; print_newline () ; main (try (add_term s l i) with Identifier_err err -> print_string err; print_newline (); i) 
 		| T l -> print_lambda l [] ; print_newline (); main i
 	)	
 	| None -> main i

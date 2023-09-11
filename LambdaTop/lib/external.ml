@@ -54,5 +54,5 @@ let print_beta_chain (i : identifier) (l : lambda) : unit =
 	let rec aux (bl : lambda list) : unit = 
 		match bl with
 		| [] -> print_string "\n";
-		| x :: xs -> print_lambda x i ; aux xs
+		| x :: xs -> print_lambda x i; print_string "->"; print_newline ();aux xs
 	in aux bl 	
