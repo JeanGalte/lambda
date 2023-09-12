@@ -17,6 +17,7 @@ A command can be :
 -A let command of a var name and a term
 -A remove command
 -A raw term 
+-An alpha_eq command
 
 *)
 
@@ -25,8 +26,20 @@ type command = E | I | D | P of lambda | R of string | L of (string * lambda) | 
 let rec parse_term (i : identifier) (s : string) : lambda = 
 	if String.starts_with ~prefix:"beta" s
 	then 
-		if String.length s = 4 then raise (Parse_Err "Missing argument to beta\n") else
+		if String.length s = 4 then raise (Parse_Err "Missing argument to beta-reduction\n") else
 		beta_red (parse_term i (takeoff_n s 4))	
+	else 
+	if String.starts_with ~prefix:"normalize" s
+	then
+		(if String.length s = 9 
+		then 
+			raise (Parse_Err "Missing argument for beta-normalization\n") 
+		else
+			(match normalize (parse_term i (takeoff_n s 9)) with
+			| None -> raise No_NF
+			| Some l -> l
+			)
+		)
 	else 
 		parse i s
 
@@ -37,12 +50,13 @@ let parse_let (i : identifier) (s : string) : command =
 		let w, t = (String.capitalize_ascii (List.nth spl 0)), (parse_term i (List.nth spl 1)) in
 		L (w, t)
 	else 
-		raise (Parse_Err "Two = char seen in let expression, cannot parse")
+		raise (Parse_Err "Two = char seen in let expression, cannot parse\n")
 
 let parse_rm (s : string) : command = R (takeoff_n s 2)
 
 let parse_beta_chain (i : identifier) (s : string) : command = 
 	P (parse i (takeoff_n s 16))
+
 
 let parse_command (i : identifier) (s : string) : command option =
 	let ts = trimspaces s in 
@@ -53,7 +67,11 @@ let parse_command (i : identifier) (s : string) : command option =
 	| _ when String.starts_with ~prefix:"rm" ts -> Some (parse_rm ts)
 	| _ when String.starts_with ~prefix:"let" ts -> Some (parse_let i ts) 
 	| _ when String.starts_with ~prefix:"load_default_id" ts -> Some D
-	| _ -> (try Some (T (parse_term i ts)) with Parse_Err err | Term_Parse_Err err-> (print_string err ; print_newline (); None))
+	| _ -> (try Some (T (parse_term i ts)) with 
+			| Parse_Err err -> (print_string err ; print_newline (); None)
+			| Max_Beta_Red -> (print_string "Maximum beta reduction limit reached for this term\n" ; None)
+			| No_NF -> (print_string "No normal form has been reached for this term, he is invariant by beta reduction. The term is probably β-equivalent to (λx.xx)λx.xx \n"; None)
+			)
 
 let rec main (i : identifier) : unit = 
 	print_string "λT>" ; 

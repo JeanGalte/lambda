@@ -1,7 +1,8 @@
 open Lambda
 open Substitution
 
-exception Max_Beta_evaluating of string 
+exception Max_Beta_Red 
+exception No_NF
 
 (* Evaluates to true if and only if the term is in normal form for the beta-reduction*)
 let rec is_beta_normal (l : lambda) : bool = 
@@ -33,7 +34,7 @@ let rec beta_red (l : lambda) : lambda =
 (* Get the beta-reduction "chain" for a certain length*)
 let get_beta_red_chain ?(lim = 1000000000) (l : lambda) : lambda list = 
 	let rec aux (l : lambda) (acc : lambda list) (lim  :int) : lambda list =
-		if lim = 0 then raise (Max_Beta_evaluating "Not reaching a normal form") else
+		if lim = 0 then raise Max_Beta_Red  else
 		match l with
 		| A (L t,l2) -> aux (subs (ind l2) t) (acc @ [l]) (lim -1)
 		| A (t, v) when is_beta_normal t -> aux (A (t, beta_red v)) (acc @ [l]) (lim -1)
@@ -47,7 +48,7 @@ Does not terminate always ! Evaluating in None guarantees that your term has no 
 For example, a n-cylce is not evaluating to None if n >2.  
 *)
 let rec normalize ?(lim = 1000000000) (l : lambda) : lambda option =
-	if lim = 0 then raise (Max_Beta_evaluating "Not reaching a notmal form") else 
+	if lim = 0 then raise Max_Beta_Red  else 
 	if is_beta_normal l 
 	then 
 		Some l 
