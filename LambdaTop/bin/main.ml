@@ -18,10 +18,11 @@ A command can be :
 -A let command of a var name and a term
 -A remove command
 -An alpha_eq command
+-A beta_eq command
 -A raw term 
 *)
 
-type command = E | Err of exn |I | D | P of lambda | R of string | L of (string * lambda) | A of (lambda * lambda) |T of lambda
+type command = E | Err of exn |I | D | P of lambda | R of string | L of (string * lambda) | A of (lambda * lambda) | B of (lambda  * lambda ) | T of lambda
 
 let rec parse_term (i : identifier) (s : string) : lambda = 
 	if String.starts_with ~prefix:"beta" s
@@ -56,6 +57,20 @@ let parse_let (i : identifier) (s : string) : command =
 	else 
 		Err (Parse_Err "Two = char seen in let expression, cannot parse\n")
 
+let parse_betaeq (i : identifier) (s : string) : command = 
+	let spl = String.split_on_char ',' (takeoff_n s 7) in
+	if List.length spl = 2
+	then 
+		let l1, l2 = handle_parse_term i (List.nth spl 0) , handle_parse_term i (List.nth spl 0) in 
+		match (l1, l2) with
+		| T t1, T t2 -> B (t1, t2)
+		| (Err e, _ ) -> Err e
+		| (_, Err e) -> Err e
+		| _ -> Err (Parse_Err "Something went wrong with alpha equivalence testing")
+	else 
+		Err (Parse_Err "Bad syntax for beta equivalence. Use it this way : beta_eq [term 1] , [term 2] \n")
+
+
 let parse_rm (s : string) : command = R (takeoff_n s 2)
 
 let parse_beta_chain (i : identifier) (s : string) : command = 
@@ -87,6 +102,7 @@ let parse_command (i : identifier) (s : string) : command  =
 	| _ when String.starts_with ~prefix:"let" ts ->  parse_let i ts 
 	| _ when String.starts_with ~prefix:"load_default_id" ts -> D
 	| _ when String.starts_with ~prefix:"alpha_eq" ts -> parse_alphaeq i ts
+	| _ when String.starts_with ~prefix:"beta_eq" ts -> parse_betaeq i ts
 	| _ -> handle_parse_term i ts
 
 let rec main (i : identifier) : unit = 
@@ -101,6 +117,7 @@ let rec main (i : identifier) : unit =
 	| L (s, l) -> print_lambda l [] ; print_newline () ; main (try (add_term s l i) with Identifier_err err -> print_string err; print_newline (); i) 
 	| T l -> print_lambda l [] ; print_newline (); main i
 	| A (l1, l2) -> (if l1 = l2 then print_string "True" else print_string "False") ; print_newline () ; main i
+	| B (l1, l2) -> (if beta_eq l1 l2 then print_string "True" else print_string "False") ; print_newline () ; main i
 	| Err e ->
 		(
 		match e with
